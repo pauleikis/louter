@@ -8,8 +8,9 @@ from louter.core.keycaps import KeyCaps
 
 inward_rolls = set(combinations('prmit', 3)) | set(combinations('PRMIT', 3)) | set(combinations('prmit', 2)) | set(combinations('PRMIT', 2))
 outward_rolls = set(combinations('timrp', 3)) | set(combinations('TIMRP', 3)) | set(combinations('timrp', 2)) | set(combinations('TIMRP', 2))
-same_finger_penalty = {k: p for k, p in zip("prmitPRMIT", [2, 1.7, 1.1, 1.1, 1.5] * 2)}
+same_finger_penalty = {k: p for k, p in zip("prmitPRMIT", [5, 3, 1.3, 1.1, 1.5] * 2)}
 left_hand = "prmit"
+
 
 class Criterion:
 
@@ -24,7 +25,9 @@ class Criterion:
 
 
 class FrequencyStrainCriterion(Criterion):
-    fitness = None
+    freqs = None
+    freqs2 = None
+    freqs3 = None
 
     def __init__(self, freqs, freqs2, freqs3) -> None:
         super().__init__()
@@ -33,12 +36,12 @@ class FrequencyStrainCriterion(Criterion):
         self.freqs3 = freqs3
 
     def __call__(self, keycaps):
-        if self.fitness is None:
+        if keycaps.fitness.get(self.__class__.__qualname__) is None:
             result = self.single_letter_fitness(keycaps)
             result += self.gram2_fitness(keycaps)
             result += self.gram3_fitness(keycaps)
-            self.fitness = result / sum(keycaps.strain.values()) * 1_000
-        return self.fitness
+            keycaps.fitness[self.__class__.__qualname__] = result / sum(keycaps.strain.values()) * 1_000
+        return keycaps.fitness[self.__class__.__qualname__]
 
     def single_letter_fitness(self, keycaps):
         result = sum(keycaps.strain[key] * self.freqs.get(key, 0) for key in keycaps.keycaps)
@@ -98,63 +101,66 @@ class FrequencyStrainCriterion(Criterion):
 
 class LT(FrequencyStrainCriterion):
     def __init__(self):
-        freqs = {
-            'I': 13.7081,
-            'A': 11.4997,
-            'S': 7.8496,
-            'O': 5.9718,
-            'R': 5.4813,
-            'E': 5.4946,
-            'T': 5.9735,
-            'N': 5.0750,
-            'U': 4.6032,
-            'K': 4.4993,
-            'M': 3.6232,
-            'L': 3.0893,
-            'P': 2.9297,
-            'V': 2.3537,
-            'D': 2.5225,
-            'J': 1.9802,
-            'G': 1.9203,
-            'Ė': 1.5486,
-            'B': 1.5162,
-            'Y': 1.3795,
-            'Ų': 1.2424,
-            'Š': 1.2720,
-            'Ž': 0.8521,
-            'C': 0.4359,
-            'Ą': 0.7287,
-            'Į': 0.6282,
-            'Č': 0.4269,
-            'Ū': 0.4894,
-            'F': 0.2471,
-            'Z': 0.2808,
-            'H': 0.1240,
-            'Ę': 0.2293,
-            'X': 0.0170,
-            'W': 0.0052,
-            'Q': 0.0008,
-        }
+        if not LT.freqs:
+            LT.freqs = {
+                'I': 13.7081,
+                'A': 11.4997,
+                'S': 7.8496,
+                'O': 5.9718,
+                'R': 5.4813,
+                'E': 5.4946,
+                'T': 5.9735,
+                'N': 5.0750,
+                'U': 4.6032,
+                'K': 4.4993,
+                'M': 3.6232,
+                'L': 3.0893,
+                'P': 2.9297,
+                'V': 2.3537,
+                'D': 2.5225,
+                'J': 1.9802,
+                'G': 1.9203,
+                'Ė': 1.5486,
+                'B': 1.5162,
+                'Y': 1.3795,
+                'Ų': 1.2424,
+                'Š': 1.2720,
+                'Ž': 0.8521,
+                'C': 0.4359,
+                'Ą': 0.7287,
+                'Į': 0.6282,
+                'Č': 0.4269,
+                'Ū': 0.4894,
+                'F': 0.2471,
+                'Z': 0.2808,
+                'H': 0.1240,
+                'Ę': 0.2293,
+                'X': 0.0170,
+                'W': 0.0052,
+                'Q': 0.0008,
+            }
 
-        freqs2 = Counter()
-        for line in open("2grams.txt"):
-            gram, count = line.split()
-            freqs2[gram.upper()] = int(count)
-        total = sum(freqs2.values())
-        for key in freqs2:
-            freqs2[key] /= total
-        self.freqs2 = freqs2
+        if not LT.freqs2:
+            freqs2 = Counter()
+            for line in open("2grams.txt"):
+                gram, count = line.split()
+                freqs2[gram.upper()] = int(count)
+            total = sum(freqs2.values())
+            for key in freqs2:
+                freqs2[key] /= total
+            LT.freqs2 = freqs2
 
-        freqs3 = Counter()
-        for line in open("3grams.txt"):
-            gram, count = line.split()
-            freqs3[gram.upper()] = int(count)
-        total = sum(freqs3.values())
-        for key in freqs3:
-            freqs3[key] /= total
-        self.freqs3 = freqs3
+        if not LT.freqs3:
+            freqs3 = Counter()
+            for line in open("3grams.txt"):
+                gram, count = line.split()
+                freqs3[gram.upper()] = int(count)
+            total = sum(freqs3.values())
+            for key in freqs3:
+                freqs3[key] /= total
+            LT.freqs3 = freqs3
 
-        super().__init__(freqs, freqs2, freqs3)
+        super().__init__(LT.freqs, LT.freqs2, LT.freqs3)
 
 
 class EN(FrequencyStrainCriterion):

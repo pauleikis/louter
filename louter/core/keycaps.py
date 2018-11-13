@@ -19,10 +19,10 @@ class KeyCaps:
         self.name = name
         self.fingers = {k: f for k, f in zip(self.keycaps, self.keyboard.fingers)}
         self.strain = {k: s * finger_adj[f] for k, s, f in zip(self.keycaps, self.keyboard.strain, self.keyboard.fingers)}
+        self.fitness = {}
 
         assert len(self.keycaps) == self.keyboard.size, f"{len(self.keycaps)} != {self.keyboard.size}"
         assert not self.has_duplicates()
-
 
     def has_duplicates(self):
         unique_letters = set(self.keycaps) - {' ', None, RESERVED}
