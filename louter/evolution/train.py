@@ -27,9 +27,9 @@ def breed(pool):
 
 def evolve():
     pool = init()
-    for idx in range(100):
+    for idx in range(1000):
         if not idx % 1:
-            print(f"{idx:>5}: total pool {sum(pool):20,.4f} - best: {pool[0]:10,.4f}")
+            print(f"{idx:>5} - total pool: {sum(pool):15,.2f} - best: {pool[0]():12,.4f}")
         pool = breed(pool)
     return pool
 
