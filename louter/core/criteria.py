@@ -8,7 +8,7 @@ from louter.core.keycaps import KeyCaps
 
 inward_rolls = set(combinations('prmit', 3)) | set(combinations('PRMIT', 3)) | set(combinations('prmit', 2)) | set(combinations('PRMIT', 2))
 outward_rolls = set(combinations('timrp', 3)) | set(combinations('TIMRP', 3)) | set(combinations('timrp', 2)) | set(combinations('TIMRP', 2))
-same_finger_penalty = {k: p for k, p in zip("prmitPRMIT", [5, 3, 1.3, 1.1, 1.5] * 2)}
+same_finger_penalty = {k: p for k, p in zip("prmitPRMIT", [5, 2, 1.3, 1.2, 1.5] * 2)}
 left_hand = "prmit"
 
 
@@ -85,14 +85,14 @@ class FrequencyStrainCriterion(Criterion):
             if fingers[0] == fingers[1] == fingers[2]:
                 multiplier *= same_finger_penalty[fingers[0]]
             elif fingers in inward_rolls:
-                multiplier *= 0.9
+                multiplier *= 0.6
             elif fingers in outward_rolls:
-                multiplier *= 0.95
+                multiplier *= 0.9
             else:
                 if (fingers[0] in left_hand) != (fingers[1] in left_hand):
-                    multiplier *= 0.85
+                    multiplier *= 0.7
                 if (fingers[1] in left_hand) != (fingers[2] in left_hand):
-                    multiplier *= 0.85
+                    multiplier *= 0.7
             strain += (keycaps.strain[gram[1]] + keycaps.strain[gram[2]]) * multiplier
             strain *= freq
             result += strain

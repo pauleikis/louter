@@ -18,9 +18,9 @@ def breed(pool):
     offsprings = []
     for kb in pool[:20]:
         offsprings.append((kb @ random.choice(pool)))
-        offsprings.append((kb @ random.choice(pool)) >> 2)
-        offsprings.append((kb @ random.choice(pool)) >> 4)
-        offsprings.append((kb @ random.choice(pool)) >> 7)
+        offsprings.append((kb @ random.choice(pool)) >> 5)
+        offsprings.append((kb @ random.choice(pool)) >> 10)
+        offsprings.append((kb @ random.choice(pool)) >> 20)
 
     return sorted(pool + offsprings)[:POOL_SIZE]
 
@@ -29,7 +29,7 @@ def evolve():
     pool = init()
     for idx in range(100):
         if not idx % 1:
-            print(f"{idx:>5}: {sum(pool):14,.4f}")
+            print(f"{idx:>5}: total pool {sum(pool):20,.4f} - best: {pool[0]:10,.4f}")
         pool = breed(pool)
     return pool
 
