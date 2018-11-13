@@ -234,6 +234,16 @@ class Criteria:
             return self() + other()
         return self() + other
 
+    def __eq__(self, other):
+        if type(self) is not type(other):
+            return False
+        assert self.criteria == other.criteria
+        assert self.powers == other.powers
+        return self.keycaps == other.keycaps
+
+    def __hash__(self):
+        return hash(self.keycaps)
+
 
 pauleikis_criteria = partial(Criteria, LT)
 

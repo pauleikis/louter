@@ -5,13 +5,15 @@ from typing import Union, Type
 from louter.core.keyboard import ISO, ANSI, PhysicalKeyboard, Ergodox
 
 RESERVED = '◆'
+invalid_sources = (None, ' ', RESERVED)
+invalid_targets = (RESERVED,)
 finger_adj = {k: p for k, p in zip("prmitPRMIT", [1.2, 1, 0.9, 0.8, 0.9] * 2)}
 
 
 class KeyCaps:
 
     def __init__(self, keycaps, keyboard: Union[Type[PhysicalKeyboard], PhysicalKeyboard], name=None):
-        self.keycaps = list(k.upper() if k else k for k in keycaps)
+        self.keycaps = tuple(k.upper() if k else k for k in keycaps)
 
         if type(keyboard) is type:
             keyboard = keyboard()
@@ -33,11 +35,10 @@ class KeyCaps:
         return KeyCaps(keycaps, self.keyboard)
 
     def mutated(self):
-        a, b = random.randrange(0, len(self.keycaps)), random.randrange(0, len(self.keycaps))
-        if a == b or self.keycaps[a] == RESERVED or self.keycaps[b] == RESERVED:
-            return self.mutated()
-        keycaps = self.keycaps[:]
-        keycaps[a], keycaps[b] = keycaps[b], keycaps[a]
+        source_idx = random.choice([idx for idx, key in enumerate(self.keycaps) if key not in invalid_sources])
+        target_idx = random.choice([idx for idx, key in enumerate(self.keycaps) if key not in invalid_targets and idx != source_idx])
+        keycaps = list(self.keycaps)
+        keycaps[target_idx], keycaps[source_idx] = keycaps[source_idx], keycaps[target_idx]
         return self.reordered(keycaps)
 
     def __call__(self):
@@ -83,6 +84,18 @@ class KeyCaps:
             result += self.name + '\n'
         result += self.keyboard.template.format(*[x if x else ' ' for x in self.keycaps])
         return result
+
+    def __eq__(self, other):
+        if type(self) is not type(other):
+            return False
+        assert self.keyboard == other.keyboard
+        assert self.name == other.name
+        assert self.fingers == other.fingers
+        assert self.strain == other.strain
+        return self.keycaps == other.keycaps
+
+    def __hash__(self):
+        return hash(self.keycaps)
 
 
 class RandomKeyCaps(KeyCaps):
@@ -145,7 +158,29 @@ if __name__ == '__main__':
     # print(ansi_workman)
     # print(ansi_colemak)
 
-    print(generate_new_random_ergodox())
+    # print(generate_new_random_ergodox())
 
     # print(KeyCaps(map(str, Ergodox().strain), Ergodox))
     # print(len("ĄČĘĖĮŠŲŪŽQWERTYUIOPASDFGHJKLZXCVBNM.,_=\"/:()[]|{}"))
+
+
+    generate_new_random_ergodox = partial(
+        RandomKeyCaps,
+        "           A  "
+        "            "
+        "  "
+        "            "
+        "  "
+        "            "
+        "◆◆◆◆"
+        "◆◆◆       "
+        "◆◆"
+        "◆◆◆◆"
+        "◆◆",
+        Ergodox,
+    )
+    dox = generate_new_random_ergodox()
+    print(dox)
+    print(dox >> 1)
+    print(dox >> 1)
+    print(dox >> 1)
