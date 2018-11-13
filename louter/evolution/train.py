@@ -25,12 +25,16 @@ def breed(pool):
     return sorted(pool + offsprings)[:POOL_SIZE]
 
 
-def main():
+def evolve():
     pool = init()
     for idx in range(100):
         if not idx % 1:
             print(f"{idx:>5}: {sum(pool):14,.4f}")
         pool = breed(pool)
+    return pool
+
+def main():
+    pool = evolve()
     print(pool[0])
     print(pool[1])
     print(pool[2])

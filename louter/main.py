@@ -1,13 +1,8 @@
+from louter.evolution.train import evolve
 
 if __name__ == '__main__':
-    result = 0
-    for line in open("../3grams.txt"):
-        result += int(line.split()[1])
-    print(result)
-
-    result = 0
-    for line in open("../2grams.txt"):
-        result += int(line.split()[1])
-    print(result)
-
-    print(result - 25187693)
+    pool = evolve()
+    print(pool[0])
+    print(pool[1])
+    print(pool[2])
+    print(pool[3])
