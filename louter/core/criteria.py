@@ -2,9 +2,15 @@ from collections import Counter
 from functools import partial
 from math import e
 from itertools import combinations
+from pathlib import Path
 
 from louter.core.keycaps import KeyCaps
 
+# used get badness in decent range like ~ [1, 10] for visual representation, does not affect results
+from louter.util.debug import trace
+
+MULTIPLIER = 100 * e  # why e? because why not!
+PATH_TO_DATA = Path(__file__).parent.parent / 'data'
 
 inward_rolls = set(combinations('prmit', 3)) | set(combinations('PRMIT', 3)) | set(combinations('prmit', 2)) | set(combinations('PRMIT', 2))
 outward_rolls = set(combinations('timrp', 3)) | set(combinations('TIMRP', 3)) | set(combinations('timrp', 2)) | set(combinations('TIMRP', 2))
@@ -36,19 +42,19 @@ class FrequencyStrainCriterion(Criterion):
         self.freqs3 = freqs3
 
     def __call__(self, keycaps):
-        if keycaps.fitness.get(self.__class__.__qualname__) is None:
-            result = self.single_letter_fitness(keycaps)
-            result += self.gram2_fitness(keycaps)
-            result += self.gram3_fitness(keycaps)
-            keycaps.fitness[self.__class__.__qualname__] = result / sum(keycaps.strain.values()) * 1_000
-        return keycaps.fitness[self.__class__.__qualname__]
+        if keycaps.badness.get(self.__class__.__qualname__) is None:
+            result = self.single_letter_badness(keycaps)
+            result += self.gram2_badness(keycaps)
+            result += self.gram3_badness(keycaps)
+            keycaps.badness[self.__class__.__qualname__] = result / sum(keycaps.strain.values()) * MULTIPLIER
+        return keycaps.badness[self.__class__.__qualname__]
 
-    def single_letter_fitness(self, keycaps):
+    def single_letter_badness(self, keycaps):
         result = sum(keycaps.strain[key] * self.freqs.get(key, 0) for key in keycaps.keycaps)
         result /= sum(self.freqs.values())
         return result
 
-    def gram2_fitness(self, keycaps):
+    def gram2_badness(self, keycaps):
         result = 0
         for gram, freq in self.freqs2.items():
             if gram[0] not in keycaps.strain or gram[1] not in keycaps.strain:
@@ -68,9 +74,10 @@ class FrequencyStrainCriterion(Criterion):
             strain += keycaps.strain[gram[1]] * multiplier
             strain *= freq
             result += strain
-        return result / 10
+        return result / 2
 
-    def gram3_fitness(self, keycaps):
+
+    def gram3_badness(self, keycaps):
         result = 0
         for gram, freq in self.freqs3.items():
             if gram[0] not in keycaps.strain or gram[1] not in keycaps.strain or gram[2] not in keycaps.strain:
@@ -96,7 +103,7 @@ class FrequencyStrainCriterion(Criterion):
             strain += (keycaps.strain[gram[1]] + keycaps.strain[gram[2]]) * multiplier
             strain *= freq
             result += strain
-        return result / 100
+        return result / 3
 
 
 class LT(FrequencyStrainCriterion):
@@ -141,47 +148,48 @@ class LT(FrequencyStrainCriterion):
             }
 
         if not LT.freqs2:
-            freqs2 = Counter()
-            for line in open("2grams.txt"):
-                gram, count = line.split()
-                freqs2[gram.upper()] = int(count)
-            total = sum(freqs2.values())
-            for key in freqs2:
-                freqs2[key] /= total
-            LT.freqs2 = freqs2
-
+            freqs = {}
+            for line in open(PATH_TO_DATA / 'lt' / '2grams.txt'):
+                gram, freq = line.split()
+                freqs[gram] = float(freq)
+            LT.freqs2 = freqs
         if not LT.freqs3:
-            freqs3 = Counter()
-            for line in open("3grams.txt"):
-                gram, count = line.split()
-                freqs3[gram.upper()] = int(count)
-            total = sum(freqs3.values())
-            for key in freqs3:
-                freqs3[key] /= total
-            LT.freqs3 = freqs3
+            freqs = {}
+            for line in open(PATH_TO_DATA / 'lt' / '3grams.txt'):
+                gram, freq = line.split()
+                freqs[gram] = float(freq)
+            LT.freqs3 = freqs
 
         super().__init__(LT.freqs, LT.freqs2, LT.freqs3)
 
 
 class EN(FrequencyStrainCriterion):
 
-    # def __init__(self) -> None:
-    #
-    #     super().__init__(self.load_freqs(), freqs2, freqs3)
+    def __init__(self) -> None:
+        if not EN.freqs:
+            freqs = {}
+            for line in open(PATH_TO_DATA / 'en' / '1grams.txt'):
+                gram, freq = line.split()
+                freqs[gram] = float(freq)
+            EN.freqs = freqs
+        if not EN.freqs2:
+            freqs = {}
+            for line in open(PATH_TO_DATA / 'en' / '2grams.txt'):
+                gram, freq = line.split()
+                freqs[gram] = float(freq)
+            EN.freqs2 = freqs
+        if not EN.freqs3:
+            freqs = {}
+            for line in open(PATH_TO_DATA / 'en' / '3grams.txt'):
+                gram, freq = line.split()
+                freqs[gram] = float(freq)
+            EN.freqs3 = freqs
 
-    def load_freqs(self):
-        import wordfreq
-        wfq = wordfreq.get_frequency_dict('en', wordlist='best')
-        result = Counter()
-        for word, freq in wfq.items():
-            for letter in word.upper():
-                if letter in 'ABCDEFGHIJKLMNOPQRSTUVWXYZ':
-                    result[letter] += freq
-        return result
+        super().__init__(EN.freqs, EN.freqs2, EN.freqs3)
 
 
 class Criteria:
-    fitness = None
+    badness = None
 
     def __init__(self, *criteria, keycaps: KeyCaps, powers=None):
         if not powers:
@@ -192,14 +200,9 @@ class Criteria:
         self.keycaps = keycaps
 
     def __call__(self):
-        if self.fitness is None:
-            self.fitness = sum(c(self.keycaps) ** p for c, p in zip(self.criteria, self.powers))
-        return self.fitness
-
-    def __eq__(self, other):
-        if type(self) is not type(other):
-            return False
-        return self.keycaps == other.keycaps and all(a == b for a, b in zip(self.criteria, other.criteria))
+        if self.badness is None:
+            self.badness = sum(c(self.keycaps) ** p for c, p in zip(self.criteria, self.powers))
+        return self.badness
 
     def __matmul__(self, other):
         assert type(self) is type(other)
@@ -245,7 +248,7 @@ class Criteria:
         return hash(self.keycaps)
 
 
-pauleikis_criteria = partial(Criteria, LT)
+pauleikis_criteria = partial(Criteria, LT, EN)
 
 
 if __name__ == '__main__':
