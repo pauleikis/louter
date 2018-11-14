@@ -46,11 +46,11 @@ class FrequencyStrainCriterion(Criterion):
             result = self.single_letter_badness(keycaps)
             result += self.gram2_badness(keycaps)
             result += self.gram3_badness(keycaps)
-            keycaps.badness[self.__class__.__qualname__] = result / sum(keycaps.strain.values()) * MULTIPLIER
+            keycaps.badness[self.__class__.__qualname__] = result / sum(keycaps.keyboard.strain) * MULTIPLIER
         return keycaps.badness[self.__class__.__qualname__]
 
     def single_letter_badness(self, keycaps):
-        result = sum(keycaps.strain[key] * self.freqs.get(key, 0) for key in keycaps.keycaps)
+        result = sum(keycaps.strain.get(key, 0) * self.freqs.get(key, 0) for key in keycaps.keycaps)
         result /= sum(self.freqs.values())
         return result
 
@@ -249,12 +249,34 @@ class Criteria:
 
 
 pauleikis_criteria = partial(Criteria, LT, EN)
+english_criteria = partial(Criteria, EN)
 
 
 if __name__ == '__main__':
-    from louter.core.keycaps import ansi_with_lt, iso_with_lt, ansi_dvorak, ansi_workman, ansi_colemak
-    print(pauleikis_criteria(keycaps=iso_with_lt))
-    print(pauleikis_criteria(keycaps=ansi_with_lt))
-    print(pauleikis_criteria(keycaps=ansi_dvorak))
-    print(pauleikis_criteria(keycaps=ansi_workman))
-    print(pauleikis_criteria(keycaps=ansi_colemak))
+    # from louter.core.keycaps import ansi_with_lt, iso_with_lt, ansi_dvorak, ansi_workman, ansi_colemak, ansi_colemak_dh
+    # print(pauleikis_criteria(keycaps=iso_with_lt))
+    # print(pauleikis_criteria(keycaps=ansi_with_lt))
+    # print(pauleikis_criteria(keycaps=ansi_dvorak))
+    # print(pauleikis_criteria(keycaps=ansi_workman))
+    # print(pauleikis_criteria(keycaps=ansi_colemak))
+    # print(pauleikis_criteria(keycaps=ansi_colemak_dh))
+
+    # print(english_criteria(keycaps=iso_with_lt))
+    # print(english_criteria(keycaps=ansi_with_lt))
+    # print(english_criteria(keycaps=ansi_dvorak))
+    # print(english_criteria(keycaps=ansi_workman))
+    # print(english_criteria(keycaps=ansi_colemak))
+    # print(english_criteria(keycaps=ansi_colemak_dh))
+
+    from louter.core.keyboard import Ergodox, ANSI
+    # print(pauleikis_criteria(keycaps=KeyCaps("Ž  W  QĘ      Ų JTF  YDG ČZĄ VRMA ĖOKPH ĮŪŠ◆  LNEIC B ◆◆◆◆◆◆◆ SU   X◆◆◆◆◆◆◆◆", Ergodox)))
+    # print(pauleikis_criteria(keycaps=KeyCaps("   W  QĘ      ŲŽJTF  YDG ČZĄ VRMA ĖOKPH ĮŪŠ◆  LNEIC B ◆◆◆◆◆◆◆ SU   X◆◆◆◆◆◆◆◆", Ergodox)))
+    # print(pauleikis_criteria(keycaps=KeyCaps("   W  QĘ      Ų JTF  YDG ČZĄ VRMA ĖOKPH ĮŪŠ◆ ŽLNEIC B ◆◆◆◆◆◆◆ SU   X◆◆◆◆◆◆◆◆", Ergodox)))
+
+    from pprint import pprint
+    a = KeyCaps("             XFMRVZDLA K  NHTSW IEOPG  YB CU JQ", ANSI)
+    b = KeyCaps("             XFMRVZDLAK   NHTSW IEOPG  YB CU JQ", ANSI)
+    # c = KeyCaps("         Z   XBRUJ YCD Q  NITAFGEOHSV  MP WL  K", ANSI)
+    print(english_criteria(keycaps=a))
+    print(english_criteria(keycaps=b))
+    # print(english_criteria(keycaps=c))

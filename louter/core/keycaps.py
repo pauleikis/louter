@@ -19,8 +19,8 @@ class KeyCaps:
             keyboard = keyboard()
         self.keyboard = keyboard
         self.name = name
-        self.fingers = {k: f for k, f in zip(self.keycaps, self.keyboard.fingers)}
-        self.strain = {k: s * finger_adj[f] for k, s, f in zip(self.keycaps, self.keyboard.strain, self.keyboard.fingers)}
+        self.fingers = {k: f for k, f in zip(self.keycaps, self.keyboard.fingers) if k not in invalid_sources}
+        self.strain = {k: s * finger_adj[f] for k, s, f in zip(self.keycaps, self.keyboard.strain, self.keyboard.fingers) if k not in invalid_sources}
         self.badness = {}
 
         assert len(self.keycaps) == self.keyboard.size, f"{len(self.keycaps)} != {self.keyboard.size}"
@@ -83,6 +83,8 @@ class KeyCaps:
         if self.name:
             result += self.name + '\n'
         result += self.keyboard.template.format(*[x if x else ' ' for x in self.keycaps])
+        result += '\n'
+        result += "\"" + "".join(k if k else ' ' for k in self.keycaps) + "\""
         return result
 
     def __eq__(self, other):
@@ -119,7 +121,10 @@ iso_with_lt = KeyCaps(" ĄČĘĖĮŠŲŪ   ŽQWERTYUIOP  ASDFGHJKL   ZXCVBNM   "
 ansi_with_lt = KeyCaps(" ĄČĘĖĮŠŲŪ   ŽQWERTYUIOP   ASDFGHJKL  ZXCVBNM   ", ANSI, 'ANSI QWERTY with LT')
 ansi_dvorak = KeyCaps(" ĄČĘĖĮŠŲŪ   Ž   PYFGCRL   AOEUIDHTNS  QJKXBMWVZ", ANSI, 'ANSI DVORAK with LT')
 ansi_colemak = KeyCaps(" ĄČĘĖĮŠŲŪ   ŽQWFPGJLUY    ARSTDHNEIO ZXCVBKM   ", ANSI, 'ANSI COLEMAK with LT')
+ansi_colemak_dh = KeyCaps("             QWFPBJLUY    ARSTGKNEIO ZXCDVMH   ", ANSI, 'ANSI COLEMAK with LT')
 ansi_workman = KeyCaps(" ĄČĘĖĮŠŲŪ   ŽQDRWBJFUP    ASHTGYNEOI ZXMCVKL   ", ANSI, 'ANSI WORKMAN with LT')
+
+generate_new_random_ansi_english = partial(RandomKeyCaps, "QWERTYUIOPASDFGHJKLZXCVBNM", ANSI)
 
 ergodox = KeyCaps("=ĄČĘĖĮ  ŠŲŪŽ:\""
                                   " QWERTYUIOP/"
@@ -152,11 +157,12 @@ generate_new_random_ergodox = partial(
 
 
 if __name__ == '__main__':
-    # print(iso_with_lt)
-    # print(ansi_with_lt)
-    # print(ansi_dvorak)
-    # print(ansi_workman)
-    # print(ansi_colemak)
+    print(iso_with_lt)
+    print(ansi_with_lt)
+    print(ansi_dvorak)
+    print(ansi_workman)
+    print(ansi_colemak)
+    print(ansi_colemak_dh)
 
     # print(generate_new_random_ergodox())
 
@@ -164,23 +170,23 @@ if __name__ == '__main__':
     # print(len("ĄČĘĖĮŠŲŪŽQWERTYUIOPASDFGHJKLZXCVBNM.,_=\"/:()[]|{}"))
 
 
-    generate_new_random_ergodox = partial(
-        RandomKeyCaps,
-        "           A  "
-        "            "
-        "  "
-        "            "
-        "  "
-        "            "
-        "◆◆◆◆"
-        "◆◆◆       "
-        "◆◆"
-        "◆◆◆◆"
-        "◆◆",
-        Ergodox,
-    )
-    dox = generate_new_random_ergodox()
-    print(dox)
-    print(dox >> 1)
-    print(dox >> 1)
-    print(dox >> 1)
+    # generate_new_random_ergodox = partial(
+    #     RandomKeyCaps,
+    #     "           A  "
+    #     "            "
+    #     "  "
+    #     "            "
+    #     "  "
+    #     "            "
+    #     "◆◆◆◆"
+    #     "◆◆◆       "
+    #     "◆◆"
+    #     "◆◆◆◆"
+    #     "◆◆",
+    #     Ergodox,
+    # )
+    # dox = generate_new_random_ergodox()
+    # print(dox)
+    # print(dox >> 1)
+    # print(dox >> 1)
+    # print(dox >> 1)

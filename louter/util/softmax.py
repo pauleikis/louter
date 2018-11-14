@@ -23,7 +23,11 @@ def weighted_choice(seq, weights):
 
 
 def softmax(seq, t):
-    t /= stdev(seq)
+    try:
+        t /= stdev(seq)
+    except ZeroDivisionError:
+        print(seq)
+        raise
     zs = [exp(t * e) for e in seq]
     sum_z = sum(zs)
     return [z / sum_z for z in zs]
