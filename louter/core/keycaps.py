@@ -4,31 +4,34 @@ from typing import Union, Type
 
 from louter.core.keyboard import ISO, ANSI, PhysicalKeyboard, Ergodox
 
+SPACE = '…'
 RESERVED = '◆'
-invalid_sources = (None, ' ', RESERVED)
-invalid_targets = (RESERVED,)
+invalid_sources = {None, RESERVED}
+invalid_targets = {RESERVED}
 finger_adj = {k: p for k, p in zip("prmitPRMIT", [1.2, 1, 0.9, 0.8, 0.9] * 2)}
 
 
 class KeyCaps:
 
     def __init__(self, keycaps, keyboard: Union[Type[PhysicalKeyboard], PhysicalKeyboard], name=None):
-        self.keycaps = tuple(k.upper() if k else k for k in keycaps)
+        self.keycaps = tuple(k.upper() if k and not k == ' ' else None for k in keycaps)
 
         if type(keyboard) is type:
             keyboard = keyboard()
         self.keyboard = keyboard
         self.name = name
         self.fingers = {k: f for k, f in zip(self.keycaps, self.keyboard.fingers) if k not in invalid_sources}
+        self.fingers[SPACE] = self.keyboard.space_finger
         self.strain = {k: s * finger_adj[f] for k, s, f in zip(self.keycaps, self.keyboard.strain, self.keyboard.fingers) if k not in invalid_sources}
+        self.strain[SPACE] = self.keyboard.space_strain
         self.badness = {}
 
         assert len(self.keycaps) == self.keyboard.size, f"{len(self.keycaps)} != {self.keyboard.size}"
         assert not self.has_duplicates()
 
     def has_duplicates(self):
-        unique_letters = set(self.keycaps) - {' ', None, RESERVED}
-        total_letters = sum(k not in {' ', None, RESERVED} for k in self.keycaps)
+        unique_letters = set(self.keycaps) - invalid_sources
+        total_letters = sum(k not in invalid_sources for k in self.keycaps)
         return bool(total_letters - len(unique_letters))
 
     def reordered(self, keycaps):
@@ -50,7 +53,7 @@ class KeyCaps:
         other = other.keycaps
         keycaps = self.keycaps
         new = [a if a == b else None for a, b in zip(keycaps, other)]
-        missing = set(keycaps) - set(new) - {' ', None, RESERVED}
+        missing = set(keycaps) - set(new) - invalid_sources
         missing_idx = {idx for idx, key in enumerate(new) if key is None}
         still_missing = set()
         while missing:
@@ -141,14 +144,14 @@ ergodox = KeyCaps("=ĄČĘĖĮ  ŠŲŪŽ:\""
                                 )
 generate_new_random_ergodox = partial(
     RandomKeyCaps,
-    " ĄČĘĖĮ  ŠŲŪŽ  "
-    " QWERTYUIOP "
-    "  "
-    " ASDFGHJKL  "
-    "  "
-    "Z◆XCVBNM    "
+    "◆◆ŪŽČ◆◆◆◆ŠŲĘ◆◆"
+    "◆QWERTYUIOP◆"
+    "◆◆"
+    "ASDFGHJKLĄZX"
+    "◆◆"
+    "◆M◆ CVBN ◆◆◆"
     "◆◆◆◆"
-    "◆◆◆       "
+    "◆◆◆◆ĖĮ◆◆◆◆"
     "◆◆"
     "◆◆◆◆"
     "◆◆",
@@ -157,14 +160,14 @@ generate_new_random_ergodox = partial(
 
 
 if __name__ == '__main__':
-    print(iso_with_lt)
-    print(ansi_with_lt)
-    print(ansi_dvorak)
-    print(ansi_workman)
-    print(ansi_colemak)
-    print(ansi_colemak_dh)
+    # print(iso_with_lt)
+    # print(ansi_with_lt)
+    # print(ansi_dvorak)
+    # print(ansi_workman)
+    # print(ansi_colemak)
+    # print(ansi_colemak_dh)
 
-    # print(generate_new_random_ergodox())
+    print(generate_new_random_ergodox())
 
     # print(KeyCaps(map(str, Ergodox().strain), Ergodox))
     # print(len("ĄČĘĖĮŠŲŪŽQWERTYUIOPASDFGHJKLZXCVBNM.,_=\"/:()[]|{}"))

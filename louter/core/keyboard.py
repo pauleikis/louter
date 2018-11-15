@@ -7,11 +7,12 @@ p, r, m, i, t, T, I, M, R, P = tuple("prmitTIMRP")
 
 class PhysicalKeyboard:
     template = None
-    keycaps = None
     size = 0
 
     strain = []
     fingers = []
+    space_finger = t
+    space_strain = 1
 
     def __str__(self):
         return self.__class__.__name__ + '\n' + self.template.format(*[' '] * self.size)
@@ -117,14 +118,14 @@ class Ergodox(PhysicalKeyboard):
     @property
     def strain(self):
         return [
-          5.2, 5, 5, 4, 5, 5,20,            20, 5, 5, 4, 5, 5, 5.2,
-          5.1, 3, 2, 1, 2, 5,                   5, 2, 1, 2, 3, 5.1,
+            8, 7, 6, 5, 6, 7,20,            20, 7, 6, 5, 6, 7, 8,
+            6, 4, 2, 1, 2, 5,                   5, 2, 1, 2, 4, 6,
                              10,            10,
-            5, 1, 1, 1, 1, 3,                   3, 1, 1, 1, 1, 5,
-                             12,            12,
-          5.1, 2, 4, 3, 1, 1,                   1, 1, 3, 4, 2, 5.1,
+            5,1.2,1, 1, 1, 3,                   3, 1, 1, 1,1.2,5,
+                             15,            15,
+            6, 2, 4, 5, 1, 2,                   2, 1, 5, 4, 2, 6,
                                 4, 7,   7, 4,
-             7, 6, 5, 3, 1,                       1, 3, 5, 6, 7,
+             8, 6, 8, 3, 1,                       1, 3, 8, 6, 8,
                                    9,   9,
                             1, 2,          2, 1,
                                    3,   3,
@@ -137,7 +138,7 @@ class Ergodox(PhysicalKeyboard):
             p, p, r, m, i, i,                   I, I, M, R, P, P,
                               i,             I,
             p, p, r, m, i, i,                   I, I, M, R, P, P,
-                              i,             I,
+                              t,             T,
             p, p, r, m, i, t,                   T, I, M, R, P, P,
                                 t, t,   T, T,
              p, p, r, t, t,                       T, T, R, P, P,

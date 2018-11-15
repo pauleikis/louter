@@ -57,8 +57,6 @@ class FrequencyStrainCriterion(Criterion):
     def gram2_badness(self, keycaps):
         result = 0
         for gram, freq in self.freqs2.items():
-            if gram[0] not in keycaps.strain or gram[1] not in keycaps.strain:
-                continue
             strain = keycaps.strain[gram[0]]
             fingers = keycaps.fingers[gram[0]], keycaps.fingers[gram[1]]
             if fingers[0] == fingers[1]:
@@ -76,12 +74,11 @@ class FrequencyStrainCriterion(Criterion):
             result += strain
         return result / 2
 
-
     def gram3_badness(self, keycaps):
         result = 0
+        count = 0
         for gram, freq in self.freqs3.items():
-            if gram[0] not in keycaps.strain or gram[1] not in keycaps.strain or gram[2] not in keycaps.strain:
-                continue
+            count += 1
             strain = keycaps.strain[gram[0]]
             fingers = keycaps.fingers[gram[0]], keycaps.fingers[gram[1]], keycaps.fingers[gram[2]]
             multiplier = 1
@@ -107,56 +104,28 @@ class FrequencyStrainCriterion(Criterion):
 
 
 class LT(FrequencyStrainCriterion):
-    def __init__(self):
+    def __init__(self, valid_chars):
         if not LT.freqs:
-            LT.freqs = {
-                'I': 13.7081,
-                'A': 11.4997,
-                'S': 7.8496,
-                'O': 5.9718,
-                'R': 5.4813,
-                'E': 5.4946,
-                'T': 5.9735,
-                'N': 5.0750,
-                'U': 4.6032,
-                'K': 4.4993,
-                'M': 3.6232,
-                'L': 3.0893,
-                'P': 2.9297,
-                'V': 2.3537,
-                'D': 2.5225,
-                'J': 1.9802,
-                'G': 1.9203,
-                'Ė': 1.5486,
-                'B': 1.5162,
-                'Y': 1.3795,
-                'Ų': 1.2424,
-                'Š': 1.2720,
-                'Ž': 0.8521,
-                'C': 0.4359,
-                'Ą': 0.7287,
-                'Į': 0.6282,
-                'Č': 0.4269,
-                'Ū': 0.4894,
-                'F': 0.2471,
-                'Z': 0.2808,
-                'H': 0.1240,
-                'Ę': 0.2293,
-                'X': 0.0170,
-                'W': 0.0052,
-                'Q': 0.0008,
-            }
+            freqs = {}
+            for line in open(PATH_TO_DATA / 'lt' / '1grams.txt'):
+                gram, freq = line.split()
+                if all(l in valid_chars for l in gram):
+                    freqs[gram] = float(freq)
+            LT.freqs = freqs
 
         if not LT.freqs2:
             freqs = {}
             for line in open(PATH_TO_DATA / 'lt' / '2grams.txt'):
                 gram, freq = line.split()
-                freqs[gram] = float(freq)
+                if all(l in valid_chars for l in gram):
+                    freqs[gram] = float(freq)
             LT.freqs2 = freqs
         if not LT.freqs3:
             freqs = {}
             for line in open(PATH_TO_DATA / 'lt' / '3grams.txt'):
                 gram, freq = line.split()
+                if all(l in valid_chars for l in gram):
+                    freqs[gram] = float(freq)
                 freqs[gram] = float(freq)
             LT.freqs3 = freqs
 
@@ -165,24 +134,27 @@ class LT(FrequencyStrainCriterion):
 
 class EN(FrequencyStrainCriterion):
 
-    def __init__(self) -> None:
+    def __init__(self, valid_chars) -> None:
         if not EN.freqs:
             freqs = {}
             for line in open(PATH_TO_DATA / 'en' / '1grams.txt'):
                 gram, freq = line.split()
-                freqs[gram] = float(freq)
+                if all(l in valid_chars for l in gram):
+                    freqs[gram] = float(freq)
             EN.freqs = freqs
         if not EN.freqs2:
             freqs = {}
             for line in open(PATH_TO_DATA / 'en' / '2grams.txt'):
                 gram, freq = line.split()
-                freqs[gram] = float(freq)
+                if all(l in valid_chars for l in gram):
+                    freqs[gram] = float(freq)
             EN.freqs2 = freqs
         if not EN.freqs3:
             freqs = {}
             for line in open(PATH_TO_DATA / 'en' / '3grams.txt'):
                 gram, freq = line.split()
-                freqs[gram] = float(freq)
+                if all(l in valid_chars for l in gram):
+                    freqs[gram] = float(freq)
             EN.freqs3 = freqs
 
         super().__init__(EN.freqs, EN.freqs2, EN.freqs3)
@@ -195,7 +167,7 @@ class Criteria:
         if not powers:
             powers = [e] * len(criteria)
         assert len(powers) == len(criteria)
-        self.criteria = [c() if type(c) is type else c for c in criteria]
+        self.criteria = [c(keycaps.strain.keys()) if type(c) is type else c for c in criteria]
         self.powers = powers
         self.keycaps = keycaps
 
@@ -253,30 +225,12 @@ english_criteria = partial(Criteria, EN)
 
 
 if __name__ == '__main__':
-    # from louter.core.keycaps import ansi_with_lt, iso_with_lt, ansi_dvorak, ansi_workman, ansi_colemak, ansi_colemak_dh
-    # print(pauleikis_criteria(keycaps=iso_with_lt))
-    # print(pauleikis_criteria(keycaps=ansi_with_lt))
-    # print(pauleikis_criteria(keycaps=ansi_dvorak))
-    # print(pauleikis_criteria(keycaps=ansi_workman))
-    # print(pauleikis_criteria(keycaps=ansi_colemak))
-    # print(pauleikis_criteria(keycaps=ansi_colemak_dh))
-
-    # print(english_criteria(keycaps=iso_with_lt))
-    # print(english_criteria(keycaps=ansi_with_lt))
-    # print(english_criteria(keycaps=ansi_dvorak))
-    # print(english_criteria(keycaps=ansi_workman))
-    # print(english_criteria(keycaps=ansi_colemak))
-    # print(english_criteria(keycaps=ansi_colemak_dh))
-
     from louter.core.keyboard import Ergodox, ANSI
-    # print(pauleikis_criteria(keycaps=KeyCaps("Ž  W  QĘ      Ų JTF  YDG ČZĄ VRMA ĖOKPH ĮŪŠ◆  LNEIC B ◆◆◆◆◆◆◆ SU   X◆◆◆◆◆◆◆◆", Ergodox)))
-    # print(pauleikis_criteria(keycaps=KeyCaps("   W  QĘ      ŲŽJTF  YDG ČZĄ VRMA ĖOKPH ĮŪŠ◆  LNEIC B ◆◆◆◆◆◆◆ SU   X◆◆◆◆◆◆◆◆", Ergodox)))
-    # print(pauleikis_criteria(keycaps=KeyCaps("   W  QĘ      Ų JTF  YDG ČZĄ VRMA ĖOKPH ĮŪŠ◆ ŽLNEIC B ◆◆◆◆◆◆◆ SU   X◆◆◆◆◆◆◆◆", Ergodox)))
 
-    from pprint import pprint
-    a = KeyCaps("             XFMRVZDLA K  NHTSW IEOPG  YB CU JQ", ANSI)
-    b = KeyCaps("             XFMRVZDLAK   NHTSW IEOPG  YB CU JQ", ANSI)
-    # c = KeyCaps("         Z   XBRUJ YCD Q  NITAFGEOHSV  MP WL  K", ANSI)
-    print(english_criteria(keycaps=a))
-    print(english_criteria(keycaps=b))
-    # print(english_criteria(keycaps=c))
+    a = KeyCaps("◆◆ ĄX◆◆◆◆ČŠQ◆◆◆ŪBOGŲWPSJZ◆◆◆ĘHDIAĖFNLMK ◆◆◆Y◆ĮECVTŽ◆◆◆◆◆◆◆◆◆◆◆UR◆◆◆◆◆◆◆◆◆◆◆◆", Ergodox)
+    b = KeyCaps("◆◆ ĄX◆◆◆◆ČŠQ◆◆◆ŪBOGŲWPSJZ◆◆◆ĘHDIAĖFNLMK ◆◆◆Y◆ĮECVTŽ◆◆◆◆◆◆◆◆◆◆◆UR◆◆◆◆◆◆◆◆◆◆◆◆", Ergodox)
+
+
+    # z = KeyCaps("◆◆QŲŪ◆◆◆◆ĖXW◆◆◆ĮRGKŠĘDNYŽ◆◆◆ZJISMĄBOLHCČ◆◆◆F◆◆AVPU◆◆◆◆◆◆◆◆◆◆◆◆TE◆◆◆◆◆◆◆◆◆◆◆◆", Ergodox)
+    print(pauleikis_criteria(keycaps=a))
+    # print(pauleikis_criteria(keycaps=b))

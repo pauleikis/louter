@@ -9,9 +9,9 @@ from louter.core.keycaps import ansi_with_lt, ansi_dvorak, ansi_colemak, ansi_wo
 from louter.util.softmax import soft_random_generator
 
 POOL_SIZE = 100
-ITERATIONS = 100
-MEAN_MUTATIONS = 4
-CROSSOVERS_PER_ITERATION = int(POOL_SIZE ** 1.3)
+# ITERATIONS = 100
+MEAN_MUTATIONS = 2
+CPI_POWER = 2
 
 
 def init():
@@ -23,23 +23,30 @@ def init():
 
 def breed(pool):
     pool = sorted(pool)
+    size = len(pool)
     offsprings = []
-    generator = soft_random_generator(pool)
-    for m, f in islice(zip(generator, generator), CROSSOVERS_PER_ITERATION):
-        offsprings.append((m @ f) >> np.random.poisson(MEAN_MUTATIONS))
+    generator = soft_random_generator(pool, t=-.2*(POOL_SIZE/size))
+    for m, f in islice(zip(generator, generator), size):
+        offsprings.append((m @ f) >> np.random.poisson(max(1, int(size / 10))))
+    for x in islice(generator, size):
+        offsprings.append(x >> np.random.poisson(max(1, int(size / 10))))
+    for x in pool:
+        offsprings.append(x >> np.random.poisson(max(1, int(size / 10))))
 
-    return sorted(set(pool + offsprings))[:POOL_SIZE]
+    return sorted(set(pool + offsprings))[:size - (random.random() < (size - 0.9)/POOL_SIZE)]
 
 
 def evolve():
     pool = init()
     try:
-        for idx in range(ITERATIONS):
+        idx = 0
+        while len(pool) > 3:
             if not idx % 1:
-                print(f"{idx:>5} - total pool: {sum(pool):15,.2f} - best: {pool[0]():12,.4f} - worst: {pool[-1]():12,.4f}")
-            if idx and not idx % 20:
+                print(f"{idx:>5} - pool size: {len(pool):>3} - total pool: {sum(pool):15,.2f} - best: {pool[0]():12,.4f} - worst: {pool[-1]():12,.4f}")
+            if idx and not idx % 10:
                 print(pool[0])
             pool = breed(pool)
+            idx += 1
     except KeyboardInterrupt:
         print()
         print(pool[0])
