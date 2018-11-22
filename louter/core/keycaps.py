@@ -158,6 +158,8 @@ generate_new_random_ergodox = partial(
     Ergodox,
 )
 
+# generate_new_preferred_ergodox = partial(KeyCaps, "◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆QBOGXJPLZ ◆◆◆◆HDIAWFTSMK◆◆◆◆Y◆◆ECVN◆◆◆◆◆◆◆◆◆◆◆◆UR◆◆◆◆◆◆◆◆◆◆◆◆", Ergodox)
+generate_new_preferred_ergodox = partial(KeyCaps, "◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆ GOYXZPLFQ◆◆◆◆HDAIWJSRMK◆◆◆◆B◆◆ECVN◆◆◆◆◆◆◆◆◆◆◆◆UT◆◆◆◆◆◆◆◆◆◆◆◆", Ergodox)
 
 if __name__ == '__main__':
     # print(iso_with_lt)
@@ -167,12 +169,13 @@ if __name__ == '__main__':
     # print(ansi_colemak)
     # print(ansi_colemak_dh)
 
-    print(generate_new_random_ergodox())
+    # print(generate_new_random_ergodox())
 
     # print(KeyCaps(map(str, Ergodox().strain), Ergodox))
     # print(len("ĄČĘĖĮŠŲŪŽQWERTYUIOPASDFGHJKLZXCVBNM.,_=\"/:()[]|{}"))
 
-
+    print(KeyCaps("◆◆ ĄX◆◆◆◆ČŠQ◆◆◆ŪBOGŲWPSJZ◆◆◆ĘHDIAĖFNLMK ◆◆◆Y◆ĮECVTŽ◆◆◆◆◆◆◆◆◆◆◆UR◆◆◆◆◆◆◆◆◆◆◆◆" ,Ergodox, 'now'))
+    print(KeyCaps("◆◆ ĄX◆◆◆◆ČŠQ◆◆◆ŪBOGŲWPLJZ◆◆◆ĘHDIAĖFNSMK ◆◆◆Y◆ĮECVTŽ◆◆◆◆◆◆◆◆◆◆◆UR◆◆◆◆◆◆◆◆◆◆◆◆" ,Ergodox, 'now'))
     # generate_new_random_ergodox = partial(
     #     RandomKeyCaps,
     #     "           A  "

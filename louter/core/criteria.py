@@ -227,10 +227,12 @@ english_criteria = partial(Criteria, EN)
 if __name__ == '__main__':
     from louter.core.keyboard import Ergodox, ANSI
 
-    a = KeyCaps("◆◆ ĄX◆◆◆◆ČŠQ◆◆◆ŪBOGŲWPSJZ◆◆◆ĘHDIAĖFNLMK ◆◆◆Y◆ĮECVTŽ◆◆◆◆◆◆◆◆◆◆◆UR◆◆◆◆◆◆◆◆◆◆◆◆", Ergodox)
-    b = KeyCaps("◆◆ ĄX◆◆◆◆ČŠQ◆◆◆ŪBOGŲWPSJZ◆◆◆ĘHDIAĖFNLMK ◆◆◆Y◆ĮECVTŽ◆◆◆◆◆◆◆◆◆◆◆UR◆◆◆◆◆◆◆◆◆◆◆◆", Ergodox)
+    a = KeyCaps("◆◆ĘĄX◆◆◆◆ČŠQ◆◆◆ŪBOGŲWPLJZ◆◆◆◆HDIAĖFTSMK◆◆◆◆Y◆ĮECVNŽ◆◆◆◆◆◆◆◆◆◆◆UR◆◆◆◆◆◆◆◆◆◆◆◆", Ergodox)
+    b = KeyCaps("◆◆XĄĘ◆◆◆◆ČŠQ◆◆◆ŪBOGŲWPLJZ◆◆◆◆HDIAĖFTSMK◆◆◆◆Y◆ĮECVNŽ◆◆◆◆◆◆◆◆◆◆◆UR◆◆◆◆◆◆◆◆◆◆◆◆", Ergodox)
+    c = KeyCaps("◆◆QĄĘ◆◆◆◆ČŠX◆◆◆ŪBOGŲWPLJZ◆◆◆◆HDIAĖFTSMK◆◆◆◆Y◆ĮECVNŽ◆◆◆◆◆◆◆◆◆◆◆UR◆◆◆◆◆◆◆◆◆◆◆◆", Ergodox)
 
 
     # z = KeyCaps("◆◆QŲŪ◆◆◆◆ĖXW◆◆◆ĮRGKŠĘDNYŽ◆◆◆ZJISMĄBOLHCČ◆◆◆F◆◆AVPU◆◆◆◆◆◆◆◆◆◆◆◆TE◆◆◆◆◆◆◆◆◆◆◆◆", Ergodox)
     print(pauleikis_criteria(keycaps=a))
-    # print(pauleikis_criteria(keycaps=b))
+    print(pauleikis_criteria(keycaps=b))
+    print(pauleikis_criteria(keycaps=c))

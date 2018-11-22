@@ -5,10 +5,10 @@ import numpy as np
 
 from louter.core.criteria import pauleikis_criteria
 from louter.core.keyboard import ANSI, Ergodox
-from louter.core.keycaps import ansi_with_lt, ansi_dvorak, ansi_colemak, ansi_workman, RandomKeyCaps, generate_new_random_ergodox
+from louter.core.keycaps import ansi_with_lt, ansi_dvorak, ansi_colemak, ansi_workman, RandomKeyCaps, generate_new_random_ergodox, generate_new_preferred_ergodox
 from louter.util.softmax import soft_random_generator
 
-POOL_SIZE = 100
+POOL_SIZE = 60
 # ITERATIONS = 100
 MEAN_MUTATIONS = 2
 CPI_POWER = 2
@@ -17,7 +17,7 @@ CPI_POWER = 2
 def init():
     result = []
     for _ in range(POOL_SIZE - len(result)):
-        result += [generate_new_random_ergodox()]
+        result += [generate_new_preferred_ergodox()]
     return sorted(pauleikis_criteria(keycaps=kc) for kc in result)
 
 
@@ -33,7 +33,7 @@ def breed(pool):
     for x in pool:
         offsprings.append(x >> np.random.poisson(max(1, int(size / 10))))
 
-    return sorted(set(pool + offsprings))[:size - (random.random() < (size - 0.9)/POOL_SIZE)]
+    return sorted(set(pool + offsprings))[:size - (random.random() < (size - 0.9)/(POOL_SIZE * 4))]
 
 
 def evolve():

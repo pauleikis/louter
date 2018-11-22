@@ -8,7 +8,7 @@ FINAL = set()
 def find_improved(layout):
     print("".join(k if k else ' ' for k in layout.keycaps.keycaps))
     result = set()
-    for _ in range(1000):
+    for _ in range(3000):
         if not _ % 100:
             print(_)
         new = layout >> 1
@@ -18,7 +18,7 @@ def find_improved(layout):
 
 
 def main():
-    initial = KeyCaps("◆◆ ĄX◆◆◆◆ZŠ ◆◆◆ŪBOGŲWPLJČ◆◆◆ĘHDIAĖFSRMKQ◆◆◆Y◆ĮECVTŽ◆◆◆◆◆◆◆◆◆◆◆UN◆◆◆◆◆◆◆◆◆◆◆◆", Ergodox)
+    initial = KeyCaps("◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆ GOYXZPLFQ◆◆◆◆HDAIWJSRMK◆◆◆◆B◆◆ECVN◆◆◆◆◆◆◆◆◆◆◆◆UT◆◆◆◆◆◆◆◆◆◆◆◆", Ergodox)
     initial = pauleikis_criteria(keycaps=initial)
     pool = [initial]
     while True:

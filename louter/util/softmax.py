@@ -26,16 +26,14 @@ def softmax(seq, t):
     try:
         t /= stdev(seq)
     except ZeroDivisionError:
-        print(t, seq)
-        raise
+        t = 30
     t = min(max(t, -30), 30)
     zs = [exp(t * e) for e in seq]
     sum_z = sum(zs)
     try:
         return [z / sum_z for z in zs]
     except ZeroDivisionError:
-        print(t, seq)
-        raise
+        return [1 / len(zs)] * len(zs)
 
 
 def soft_choice(seq, t=-1, weight_func=lambda x: x()):
