@@ -1,14 +1,19 @@
 import random
+import string
 from functools import partial
 from typing import Union, Type
 
-from louter.core.keyboard import ISO, ANSI, PhysicalKeyboard, Ergodox
+from louter.core.keyboard import ISO, ANSI, PhysicalKeyboard, Ergodox, Madox, Cradox, Classidox, Planck
 
-SPACE = '…'
+# locked = set("VDBJLTAWKCGHXUMPSEIRFYONZ")
+# locked = set("KLTAUNSEIOCGHRZWXDPM")
+# locked = set("ARSTNEIUODLK")
+locked = set()
 RESERVED = '◆'
 invalid_sources = {None, RESERVED}
+invalid_sources |= set(locked)
 invalid_targets = {RESERVED}
-finger_adj = {k: p for k, p in zip("prmitPRMIT", [1.2, 1, 0.9, 0.8, 0.9] * 2)}
+invalid_targets |= set(locked)
 
 
 class KeyCaps:
@@ -20,19 +25,30 @@ class KeyCaps:
             keyboard = keyboard()
         self.keyboard = keyboard
         self.name = name
-        self.fingers = {k: f for k, f in zip(self.keycaps, self.keyboard.fingers) if k not in invalid_sources}
-        self.fingers[SPACE] = self.keyboard.space_finger
-        self.strain = {k: s * finger_adj[f] for k, s, f in zip(self.keycaps, self.keyboard.strain, self.keyboard.fingers) if k not in invalid_sources}
-        self.strain[SPACE] = self.keyboard.space_strain
+        # self.fingers = {k: f for k, f in zip(self.keycaps, self.keyboard.fingers) if k not in invalid_sources}
+        self.fingers = {k: f for k, f in zip(self.keycaps, self.keyboard.fingers)}
+        # self.strain = {k: s * finger_adj[f] for k, s, f in zip(self.keycaps, self.keyboard.strain, self.keyboard.fingers) if k not in invalid_sources}
+        self.strain = {k: s for k, s in zip(self.keycaps, self.keyboard.strain)}
         self.badness = {}
+        self.rows = {k: int(s) for k, s in zip(self.keycaps, self.keyboard.rows)}
+        self.zones = {k: s for k, s in zip(self.keycaps, self.keyboard.zones)}
+        # self.stretch = {}
+        # for (a, b), m in self.keyboard.stretch.items():
+        #     if self.keycaps[a] and self.keycaps[b]:
+        #         self.stretch[self.keycaps[a] + self.keycaps[b]] = m
+        #         self.stretch[self.keycaps[b] + self.keycaps[a]] = m
+
 
         assert len(self.keycaps) == self.keyboard.size, f"{len(self.keycaps)} != {self.keyboard.size}"
-        assert not self.has_duplicates()
+        assert not self.has_duplicates(), self.has_duplicates()  
 
     def has_duplicates(self):
         unique_letters = set(self.keycaps) - invalid_sources
-        total_letters = sum(k not in invalid_sources for k in self.keycaps)
-        return bool(total_letters - len(unique_letters))
+        total_letters = [k for k in self.keycaps if k not in invalid_sources]
+        for letter in unique_letters:
+            total_letters.remove(letter)
+            
+        return total_letters
 
     def reordered(self, keycaps):
         return KeyCaps(keycaps, self.keyboard)
@@ -109,7 +125,7 @@ class RandomKeyCaps(KeyCaps):
         keycaps = list(keycaps)
         if RESERVED in keycaps:
             assert len(keycaps) == keyboard.size
-            unfrozen_indices, unfrozen_subset = zip(*[(i, e) for i, e in enumerate(keycaps) if e != RESERVED])
+            unfrozen_indices, unfrozen_subset = zip(*[(i, e) for i, e in enumerate(keycaps) if e not in invalid_sources])
             unfrozen_indices = list(unfrozen_indices)
             random.shuffle(unfrozen_indices)
             for i, e in zip(unfrozen_indices, unfrozen_subset):
@@ -120,46 +136,62 @@ class RandomKeyCaps(KeyCaps):
         super().__init__(keycaps, keyboard, name)
 
 
-iso_with_lt = KeyCaps(" ĄČĘĖĮŠŲŪ   ŽQWERTYUIOP  ASDFGHJKL   ZXCVBNM   ", ISO, 'ISO QWERTY with LT')
-ansi_with_lt = KeyCaps(" ĄČĘĖĮŠŲŪ   ŽQWERTYUIOP   ASDFGHJKL  ZXCVBNM   ", ANSI, 'ANSI QWERTY with LT')
-ansi_dvorak = KeyCaps(" ĄČĘĖĮŠŲŪ   Ž   PYFGCRL   AOEUIDHTNS  QJKXBMWVZ", ANSI, 'ANSI DVORAK with LT')
-ansi_colemak = KeyCaps(" ĄČĘĖĮŠŲŪ   ŽQWFPGJLUY    ARSTDHNEIO ZXCVBKM   ", ANSI, 'ANSI COLEMAK with LT')
-ansi_colemak_dh = KeyCaps("             QWFPBJLUY    ARSTGKNEIO ZXCDVMH   ", ANSI, 'ANSI COLEMAK with LT')
-ansi_workman = KeyCaps(" ĄČĘĖĮŠŲŪ   ŽQDRWBJFUP    ASHTGYNEOI ZXMCVKL   ", ANSI, 'ANSI WORKMAN with LT')
+# iso_with_lt = KeyCaps(" ĄČĘĖĮŠŲŪ   ŽQWERTYUIOP  ASDFGHJKL   ZXCVBNM   ", ISO, 'ISO QWERTY with LT')
+# ansi_with_lt = KeyCaps(" ĄČĘĖĮŠŲŪ   ŽQWERTYUIOP   ASDFGHJKL  ZXCVBNM   ", ANSI, 'ANSI QWERTY with LT')
+# ansi_dvorak = KeyCaps(" ĄČĘĖĮŠŲŪ   Ž   PYFGCRL   AOEUIDHTNS  QJKXBMWVZ", ANSI, 'ANSI DVORAK with LT')
+# ansi_colemak = KeyCaps(" ĄČĘĖĮŠŲŪ   ŽQWFPGJLUY    ARSTDHNEIO ZXCVBKM   ", ANSI, 'ANSI COLEMAK with LT')
+# ansi_colemak_dh = KeyCaps("             QWFPBJLUY    ARSTGKNEIO ZXCDVMH   ", ANSI, 'ANSI COLEMAK with LT')
+# ansi_workman = KeyCaps(" ĄČĘĖĮŠŲŪ   ŽQDRWBJFUP    ASHTGYNEOI ZXMCVKL   ", ANSI, 'ANSI WORKMAN with LT')
 
-generate_new_random_ansi_english = partial(RandomKeyCaps, "QWERTYUIOPASDFGHJKLZXCVBNM", ANSI)
+# generate_new_random_ansi_english = partial(RandomKeyCaps, "QWERTYUIOPASDFGHJKLZXCVBNM", ANSI)
 
-ergodox = KeyCaps("=ĄČĘĖĮ  ŠŲŪŽ:\""
-                                  " QWERTYUIOP/"
-                                  "  "
-                                  "_ASDFGHJKL,."
-                                  "  "
-                                  "Z◆XCVBNM[]{}"
-                                  "◆◆◆◆"
-                                  "◆◆◆◆◆◆◆()|"
-                                  "◆◆"
-                                  "◆◆◆◆"
-                                  "◆◆"
-                                , Ergodox, 'Ergodox'
-                                )
-generate_new_random_ergodox = partial(
-    RandomKeyCaps,
-    "◆◆ŪŽČ◆◆◆◆ŠŲĘ◆◆"
-    "◆QWERTYUIOP◆"
-    "◆◆"
-    "ASDFGHJKLĄZX"
-    "◆◆"
-    "◆M◆ CVBN ◆◆◆"
-    "◆◆◆◆"
-    "◆◆◆◆ĖĮ◆◆◆◆"
-    "◆◆"
-    "◆◆◆◆"
-    "◆◆",
-    Ergodox,
-)
+# ergodox = KeyCaps("=ĄČĘĖĮ  ŠŲŪŽ:\""
+#                                   " QWERTYUIOP/"
+#                                   "  "
+#                                   "_ASDFGHJKL,."
+#                                   "  "
+#                                   "Z◆XCVBNM[]{}"
+#                                   "◆◆◆◆"
+#                                   "◆◆◆◆◆◆◆()|"
+#                                   "◆◆"
+#                                   "◆◆◆◆"
+#                                   "◆◆"
+#                                 , Ergodox, 'Ergodox'
+#                                 )
+# generate_new_random_ergodox = partial(
+#     RandomKeyCaps,
+#     "◆◆ŪŽČ◆◆◆◆ŠŲĘ◆◆"
+#     "◆QWERTYUIOP◆"
+#     "◆◆"
+#     "ASDFGHJKLĄZX"
+#     "◆◆"
+#     "◆M◆ CVBN ◆◆◆"
+#     "◆◆◆◆"
+#     "◆◆◆◆ĖĮ◆◆◆◆"
+#     "◆◆"
+#     "◆◆◆◆"
+#     "◆◆",
+#     Ergodox,
+# )
 
 # generate_new_preferred_ergodox = partial(KeyCaps, "◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆QBOGXJPLZ ◆◆◆◆HDIAWFTSMK◆◆◆◆Y◆◆ECVN◆◆◆◆◆◆◆◆◆◆◆◆UR◆◆◆◆◆◆◆◆◆◆◆◆", Ergodox)
-generate_new_preferred_ergodox = partial(KeyCaps, "◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆ GOYXZPLFQ◆◆◆◆HDAIWJSRMK◆◆◆◆B◆◆ECVN◆◆◆◆◆◆◆◆◆◆◆◆UT◆◆◆◆◆◆◆◆◆◆◆◆", Ergodox)
+# generate_new_preferred_ergodox = partial(KeyCaps, "◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆ GOYXZPLFQ◆◆◆◆HDAIWJSRMK◆◆◆◆B◆◆ECVN◆◆◆◆◆◆◆◆◆◆◆◆UT◆◆◆◆◆◆◆◆◆◆◆◆", Ergodox)
+# generate_new_preferred_ergodox = partial(KeyCaps, "◆◆XVŪ◆◆◆◆QŠŲ◆◆◆WBSKZČTELŽ◆◆◆◆HMDOPFAYUR◆◆◆◆J◆ĘĮCĄIĖ◆◆◆◆◆◆◆◆◆◆◆NG◆◆◆◆◆◆◆◆◆◆◆◆", Ergodox)
+# generate_new_preferred_ergodox = partial(KeyCaps, "◆◆QŪĘ◆◆◆◆ZŠX◆◆◆ĮGLHŲWBMJČ◆◆◆◆PKEIĖFANRD◆◆◆◆C◆ĄOYVTŽ◆◆◆◆◆◆◆◆◆◆◆US◆◆◆◆◆◆◆◆◆◆◆◆", Ergodox)
+# generate_new_preferred_ergodox = partial(KeyCaps, "◆◆ĘĄX◆◆◆◆ČŠQ◆◆◆ŪBOGŲWPLJZ◆◆◆◆HDAIĖFSRMK◆◆◆◆Y◆ĮECVNŽ◆ ◆◆◆◆◆◆◆◆◆UT◆◆◆◆◆◆◆◆◆◆◆◆", Ergodox)
+# generate_new_preferred_ergodox = partial(KeyCaps, "◆◆ XĘ◆◆◆◆ŠZQ◆◆◆ŪGOCĄJPLVČ◆◆◆◆HKAIYFSRMD◆◆◆◆Ė◆ŲEĮWNŽ◆B◆◆◆◆◆◆◆◆◆UT◆◆◆◆◆◆◆◆◆◆◆◆", Ergodox)
+# generate_new_preferred_ergodox = partial(KeyCaps, "◆◆ XĘ◆◆◆◆ZWQ◆◆◆ŪGOFĮŠPLVČ◆◆◆◆HKAIYBSRMD◆◆◆◆Ė◆ŲEĄCNŽ◆J◆◆◆◆◆◆◆◆◆UT◆◆◆◆◆◆◆◆◆◆◆◆", Ergodox)
+# generate_new_preferred_madox =  partial(KeyCaps,       "◆◆◆ŪĮ◆◆◆ĘŠŽ◆◆◆◆◆ZOYĄWMLQ◆◆◆◆◆ČGAIĖBSRDJ◆◆◆◆HCXEŲFNVPK◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆U◆◆T◆◆", Madox)
+# generate_new_random_madox = partial(RandomKeyCaps, "◆◆◆XĘČ◆◆QZW◆◆◆◆◆GOFĮŠPLŪ◆◆◆◆◆HKAIYBSRMD◆◆◆◆ĖCVEĄŲNŽ J◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆U◆◆T◆◆", Madox)
+# generate_new_preferred_cradox = partial(KeyCaps, "◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆ZOYĄWMLĮ◆◆◆◆◆ČGAIĖBSRDJ◆◆◆ŪHCXEŲFTVPKQ◆◆◆◆◆Ę◆◆ŠŽ◆◆ ◆◆◆◆UN◆◆◆", Cradox)
+# generate_new_random_cradox = partial(RandomKeyCaps, "◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆ZOYĄWMLĮ◆◆◆◆◆ČGAIĖBSRDJ◆◆◆ŪHCXEŲFTVPKQ◆◆◆◆◆Ę◆◆ŠŽ◆◆ ◆◆◆◆UN◆◆◆", Cradox)
+generate_new_random_planck = partial(RandomKeyCaps, "ABCDEFGHIJKLMNOPQRSTUVWXYZ               ◆     ", Planck)
+
+generate_new_random_planck = partial(RandomKeyCaps, "◆FHOJ  MKPC◆◆AIERQWSTNU◆◆XYZL  DGBV◆◆◆◆◆◆◆◆◆◆◆◆", Planck)
+
+cool_cradox = partial(KeyCaps, keyboard=Cradox)
+cool_classidox = partial(KeyCaps, keyboard=Classidox)
+cool_planck = partial(KeyCaps, keyboard=Planck)
 
 if __name__ == '__main__':
     # print(iso_with_lt)
@@ -168,31 +200,6 @@ if __name__ == '__main__':
     # print(ansi_workman)
     # print(ansi_colemak)
     # print(ansi_colemak_dh)
-
-    # print(generate_new_random_ergodox())
-
-    # print(KeyCaps(map(str, Ergodox().strain), Ergodox))
-    # print(len("ĄČĘĖĮŠŲŪŽQWERTYUIOPASDFGHJKLZXCVBNM.,_=\"/:()[]|{}"))
-
-    print(KeyCaps("◆◆ ĄX◆◆◆◆ČŠQ◆◆◆ŪBOGŲWPSJZ◆◆◆ĘHDIAĖFNLMK ◆◆◆Y◆ĮECVTŽ◆◆◆◆◆◆◆◆◆◆◆UR◆◆◆◆◆◆◆◆◆◆◆◆" ,Ergodox, 'now'))
-    print(KeyCaps("◆◆ ĄX◆◆◆◆ČŠQ◆◆◆ŪBOGŲWPLJZ◆◆◆ĘHDIAĖFNSMK ◆◆◆Y◆ĮECVTŽ◆◆◆◆◆◆◆◆◆◆◆UR◆◆◆◆◆◆◆◆◆◆◆◆" ,Ergodox, 'now'))
-    # generate_new_random_ergodox = partial(
-    #     RandomKeyCaps,
-    #     "           A  "
-    #     "            "
-    #     "  "
-    #     "            "
-    #     "  "
-    #     "            "
-    #     "◆◆◆◆"
-    #     "◆◆◆       "
-    #     "◆◆"
-    #     "◆◆◆◆"
-    #     "◆◆",
-    #     Ergodox,
-    # )
-    # dox = generate_new_random_ergodox()
-    # print(dox)
-    # print(dox >> 1)
-    # print(dox >> 1)
-    # print(dox >> 1)
+    print(generate_new_random_planck())
+    # print(cool_classidox("◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆ČJVBĄ◆MDYŪ◆◆◆QKLTAFŽSEIOĘ◆◆◆WCGHĮŠRPĖŲ◆◆◆◆◆◆◆◆◆ZX◆◆◆◆◆◆◆UN◆◆◆"))
+    # print(cool_classidox("◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆ČJPBĄ◆MDYŪ◆◆◆QKLTAFŽSEIOĘ◆◆◆WCGHĮŠRVĖŲ◆◆◆◆◆◆◆◆◆ZX◆◆◆◆◆◆◆UN◆◆◆"))

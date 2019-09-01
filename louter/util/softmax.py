@@ -26,7 +26,7 @@ def softmax(seq, t):
     try:
         t /= stdev(seq)
     except ZeroDivisionError:
-        t = 30
+        t = 0
     t = min(max(t, -30), 30)
     zs = [exp(t * e) for e in seq]
     sum_z = sum(zs)
@@ -47,12 +47,12 @@ def soft_random_generator(seq, t=-1, weight_func=lambda x: x()):
 
 
 if __name__ == '__main__':
-    def softmax(seq, t):
-        zs = [exp(t * e) for e in seq]
-        sum_z = sum(zs)
-        return [z / sum_z for z in zs]
+    # def softmax(seq, t):
+    #     zs = [exp(t * e) for e in seq]
+    #     sum_z = sum(zs)
+    #     return [z / sum_z for z in zs]
 
-    import statistics
+    # import statistics
     # print(softmax([100, 200, 300], -30/statistics.stdev([100, 200, 300])))
     # print(softmax([10, 20, 30], -1/statistics.stdev([10, 20, 30])))
     # print(softmax([.1, .2, .3], -1/statistics.stdev([.1, .2, .3])))
@@ -63,6 +63,4 @@ if __name__ == '__main__':
     # print()
     # print('(╯°□°）╯︵ ┻━┻')
 
-    print(softmax([17.05413737417106, 17.075772266728606, 17.075775528572922, 17.076667492495154,
-                   17.076670754525924, 17.079435154332508, 17.09329859229292, 17.096717756155474,
-                   17.10111552435441, 17.10111879090513], -30))
+    print(softmax([10, 20, 30, 30, 30, 30, 30], -2))
